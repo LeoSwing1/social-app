@@ -1,4 +1,4 @@
- import User from "../models/User.js";
+import User from "../models/User.js";
 
 // 🔥 FOLLOW / UNFOLLOW
 export const toggleFollow = async (req, res) => {
@@ -15,8 +15,12 @@ export const toggleFollow = async (req, res) => {
     const isFollowing = user.following.includes(targetId);
 
     if (isFollowing) {
-      user.following = user.following.filter(id => id.toString() !== targetId);
-      target.followers = target.followers.filter(id => id.toString() !== userId);
+      user.following = user.following.filter(
+        id => id.toString() !== targetId
+      );
+      target.followers = target.followers.filter(
+        id => id.toString() !== userId
+      );
     } else {
       user.following.push(targetId);
       target.followers.push(userId);
@@ -31,6 +35,8 @@ export const toggleFollow = async (req, res) => {
     res.status(500).json({ message: "Follow error" });
   }
 };
+
+// 🔥 SEARCH USERS
 export const searchUsers = async (req, res) => {
   try {
     const keyword = req.query.q;
@@ -40,6 +46,7 @@ export const searchUsers = async (req, res) => {
     }).select("name _id");
 
     res.json(users);
+
   } catch (err) {
     res.status(500).json({ message: "Search error" });
   }

@@ -8,7 +8,6 @@ export default function Login({ setToken }) {
 
   const navigate = useNavigate();
 
-  // 🔥 USE ENV API
   const API = process.env.REACT_APP_API_URL;
 
   const handleLogin = async (e) => {
@@ -16,20 +15,22 @@ export default function Login({ setToken }) {
     setLoading(true);
 
     try {
+      console.log("API URL:", API);
+
       const res = await fetch(`${API}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          email: form.email,
+          email: form.email.trim().toLowerCase(),
           password: form.password
         })
       });
 
       const data = await res.json();
 
-      console.log("LOGIN RESPONSE:", data); // 🔥 DEBUG
+      console.log("LOGIN RESPONSE:", data);
 
       if (!res.ok) {
         toast.error(data.message || "Invalid credentials ❌");
@@ -37,7 +38,6 @@ export default function Login({ setToken }) {
         return;
       }
 
-      // ✅ SAVE
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
@@ -45,14 +45,14 @@ export default function Login({ setToken }) {
 
       toast.success("Welcome back 🚀");
 
+      setLoading(false);
       navigate("/");
 
     } catch (err) {
       console.log(err);
       toast.error("Server error ❌");
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
