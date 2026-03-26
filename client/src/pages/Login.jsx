@@ -8,22 +8,29 @@ export default function Login({ setToken }) {
 
   const navigate = useNavigate();
 
+  // 🔥 USE ENV API
+  const API = process.env.REACT_APP_API_URL;
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password
+        })
       });
 
       const data = await res.json();
 
-      // ❌ ERROR
+      console.log("LOGIN RESPONSE:", data); // 🔥 DEBUG
+
       if (!res.ok) {
         toast.error(data.message || "Invalid credentials ❌");
         setLoading(false);
@@ -34,13 +41,10 @@ export default function Login({ setToken }) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // 🔥 UPDATE STATE
       setToken(data.token);
 
-      // ✅ TOAST FIRST
       toast.success("Welcome back 🚀");
 
-      // ✅ NAVIGATE (NO DELAY NEEDED NOW)
       navigate("/");
 
     } catch (err) {
