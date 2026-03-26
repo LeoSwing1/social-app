@@ -23,23 +23,32 @@ function App() {
       <Toaster position="top-center" />
 
       <Routes>
-        {/* 🔐 Protected Routes */}
+
+        {/* 🔐 HOME / FEED */}
         <Route
           path="/"
           element={token ? <Feed /> : <Navigate to="/login" />}
         />
 
+        {/* 🔐 PROFILE (SELF) */}
         <Route
           path="/profile"
           element={token ? <Profile /> : <Navigate to="/login" />}
         />
 
+        {/* 🔐 PROFILE (DYNAMIC) */}
+        <Route
+          path="/profile/:id"
+          element={token ? <Profile /> : <Navigate to="/login" />}
+        />
+
+        {/* 🔐 SETTINGS */}
         <Route
           path="/settings"
           element={token ? <Settings /> : <Navigate to="/login" />}
         />
 
-        {/* 🔓 Public Routes */}
+        {/* 🔓 LOGIN */}
         <Route
           path="/login"
           element={
@@ -47,12 +56,17 @@ function App() {
           }
         />
 
+        {/* 🔓 SIGNUP */}
         <Route
           path="/signup"
           element={
             !token ? <Signup /> : <Navigate to="/" />
           }
         />
+
+        {/* 🔁 FALLBACK */}
+        <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
     </BrowserRouter>
   );

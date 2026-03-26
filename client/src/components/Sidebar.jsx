@@ -5,17 +5,17 @@ export default function Sidebar({ isOpen }) {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("user"));
+
   const logout = () => {
-  toast.success("Logged out successfully 👋");
+    toast.success("Logged out successfully 👋");
 
-  // delay for animation feel
-  setTimeout(() => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    setTimeout(() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
 
-    window.location.href = "/login";
-  }, 800);
-};
+      window.location.href = "/login";
+    }, 800);
+  };
 
   return (
     <div
@@ -37,32 +37,38 @@ export default function Sidebar({ isOpen }) {
       {/* 🔍 SEARCH */}
       <input placeholder="Search users..." style={styles.search} />
 
-      {/* NAVIGATION */}
+      {/* 🧭 NAVIGATION */}
       <button onClick={() => navigate("/")} style={styles.btn}>
         🏠 Feed
       </button>
 
-      <button onClick={() => navigate("/profile")} style={styles.btn}>
+      {/* 🔥 FIXED PROFILE BUTTON */}
+      <button
+        onClick={() => user && navigate(`/profile/${user._id}`)}
+        style={styles.btn}
+      >
         👤 Profile
       </button>
 
       <button onClick={() => navigate("/settings")} style={styles.btn}>
-  ⚙️ Settings
-</button>
+        ⚙️ Settings
+      </button>
 
-      {/* LOGOUT */}
+      {/* 🚪 LOGOUT */}
       <button
-  onClick={logout}
-  style={styles.logout}
-  onMouseOver={(e) => (e.target.style.opacity = 0.8)}
-  onMouseOut={(e) => (e.target.style.opacity = 1)}
->
-  🚪 Logout
-</button>
+        onClick={logout}
+        style={styles.logout}
+        onMouseOver={(e) => (e.target.style.opacity = 0.8)}
+        onMouseOut={(e) => (e.target.style.opacity = 1)}
+      >
+        🚪 Logout
+      </button>
     </div>
   );
 }
 
+
+// 🎨 STYLES
 const styles = {
   sidebar: {
     position: "fixed",
@@ -73,7 +79,6 @@ const styles = {
     padding: 20,
     zIndex: 1000,
 
-    // 🔥 GLASS EFFECT
     background: "rgb(255, 255, 255)",
     backdropFilter: "blur(20px)",
     borderRight: "1px solid rgba(6, 3, 3, 0.2)",
@@ -125,13 +130,14 @@ const styles = {
   },
 
   logout: {
-  width: "100%",
-  padding: 12,
-  marginTop: 20,
-  background: "#ff4d4f",
-  color: "#fff",
-  border: "none",
-  borderRadius: 10,
-  cursor: "pointer",
-  transition: "0.3s ease",
-}}
+    width: "100%",
+    padding: 12,
+    marginTop: 20,
+    background: "#ff4d4f",
+    color: "#fff",
+    border: "none",
+    borderRadius: 10,
+    cursor: "pointer",
+    transition: "0.3s ease"
+  }
+};
