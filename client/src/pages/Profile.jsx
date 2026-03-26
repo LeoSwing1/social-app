@@ -1,6 +1,6 @@
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 
 export default function Profile() {
@@ -8,25 +8,31 @@ export default function Profile() {
   const [data, setData] = useState(null);
 
   const { id } = useParams();
-
   const API = process.env.REACT_APP_API_URL;
 
-  const currentUser = JSON.parse(localStorage.getItem("user"));
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
 
-  // 🔥 FETCH PROFILE DATA
-  useEffect(() => {
-    fetch(`${API}/api/users/${id}`)
-      .then(res => res.json())
-      .then(data => setData(data))
-      .catch(err => console.log(err));
+  // 🔥 FETCH PROFILE
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/api/users/${id}`);
+      const data = await res.json();
+      setData(data);
+    } catch (err) {
+      console.log(err);
+    }
   }, [id, API]);
 
-  if (!data) return <p style={{ color: "#fff" }}>Loading...</p>;
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
-  const user = data.user;
+  if (!data) return <p style={{ padding: 20 }}>Loading...</p>;
 
-  // 🔥 CHECK FOLLOWING
-  const isFollowing = user.followers.includes(currentUser._id);
+  const user = data.user || {};
+  const posts = data.posts || [];
+
+  const isFollowing = user?.followers?.includes(currentUser?._id);
 
   // 🔥 FOLLOW / UNFOLLOW
   const handleFollow = async () => {
@@ -42,8 +48,7 @@ export default function Profile() {
         })
       });
 
-      // refresh profile
-      window.location.reload();
+      fetchProfile(); // refresh without reload
     } catch (err) {
       console.log(err);
     }
@@ -51,7 +56,6 @@ export default function Profile() {
 
   return (
     <div style={styles.wrapper}>
-      
       {/* SIDEBAR */}
       <Sidebar isOpen={sidebarOpen} />
 
@@ -64,72 +68,86 @@ export default function Profile() {
       )}
 
       {/* MAIN */}
-      <div style={styles.app}>
-        
+      <div style={styles.main}>
         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* PROFILE CARD */}
-        <div style={styles.card}>
-          
-          <div style={styles.avatar}>
-            {user?.name?.charAt(0).toUpperCase()}
+        {/* CONTENT (SAME WIDTH AS FEED) */}
+        <div style={styles.container}>
+
+          {/* PROFILE CARD */}
+          <div style={styles.card}>
+            <div style={styles.row}>
+              
+              <div style={styles.left}>
+                <div style={styles.avatar}>
+                  {user?.name?.charAt(0).toUpperCase()}
+                </div>
+
+                <div>
+                  <h3 style={{ margin: 0 }}>{user?.name}</h3>
+                  <p style={styles.email}>{user?.email}</p>
+                </div>
+              </div>
+
+              {currentUser._id !== user._id && (
+                <button style={styles.followBtn} onClick={handleFollow}>
+                  {isFollowing ? "Unfollow" : "Follow"}
+                </button>
+              )}
+            </div>
+
+            {/* STATS */}
+            <div style={styles.stats}>
+              <span>
+                <strong>{user.followers?.length || 0}</strong> Followers
+              </span>
+              <span>
+                <strong>{user.following?.length || 0}</strong> Following
+              </span>
+            </div>
           </div>
 
-          <h2>{user?.name}</h2>
-          <p style={styles.email}>{user?.email}</p>
-
-          {/* FOLLOW BUTTON */}
-          {currentUser._id !== user._id && (
-            <button onClick={handleFollow} style={styles.followBtn}>
-              {isFollowing ? "Unfollow" : "Follow"}
-            </button>
+          {/* POSTS */}
+          {posts.length === 0 && (
+            <p style={{ color: "#666" }}>No posts yet</p>
           )}
 
-          {/* STATS */}
-          <div style={styles.stats}>
-            <p><strong>{user.followers.length}</strong> Followers</p>
-            <p><strong>{user.following.length}</strong> Following</p>
-          </div>
-        </div>
-
-        {/* POSTS SECTION */}
-        <div style={styles.posts}>
-          <h3 style={{ color: "#fff" }}>Posts</h3>
-
-          {data.posts.length === 0 && (
-            <p style={{ color: "#aaa" }}>No posts yet</p>
-          )}
-
-          {data.posts.map(post => (
-            <div key={post._id} style={styles.postCard}>
+          {posts.map(post => (
+            <div key={post._id} style={styles.card}>
               <p>{post.text}</p>
 
               {post.image && (
-                <img src={post.image} alt="" style={styles.postImage} />
+                <img
+                  src={post.image}
+                  alt="post"
+                  style={styles.image}
+                />
               )}
 
               <p style={styles.likes}>❤️ {post.likes}</p>
             </div>
           ))}
-        </div>
 
+        </div>
       </div>
     </div>
   );
 }
-
-
-// 🎨 STYLES
 const styles = {
   wrapper: {
     display: "flex"
   },
 
-  app: {
+  main: {
     flex: 1,
-    padding: 20,
-    background: "#1e1e2f",
+    background: "#f5f6fa", // ✅ SAME AS FEED
     minHeight: "100vh"
+  },
+
+  container: {
+    maxWidth: 600,
+    margin: "auto",
+    padding: 20
   },
 
   overlay: {
@@ -138,67 +156,63 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    background: "rgba(0,0,0,0.5)"
+    background: "rgba(0,0,0,0.3)"
   },
 
   card: {
-    background: "#2c2c54",
-    padding: 20,
+    background: "#fff",
+    padding: 15,
     borderRadius: 12,
-    textAlign: "center",
-    color: "#fff",
-    marginBottom: 20,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+    marginBottom: 15,
+    boxShadow: "0 2px 10px rgba(0,0,0,0.05)"
+  },
+
+  row: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+
+  left: {
+    display: "flex",
+    gap: 10,
+    alignItems: "center"
   },
 
   avatar: {
-    width: 80,
-    height: 80,
+    width: 45,
+    height: 45,
     borderRadius: "50%",
-    background: "#ff6b6b",
+    background: "#3b82f6",
+    color: "#fff",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: 30,
-    margin: "auto",
-    marginBottom: 10
+    fontWeight: "bold"
   },
 
   email: {
-    color: "#aaa",
-    marginBottom: 10
+    fontSize: 12,
+    color: "#888"
   },
 
   followBtn: {
-    marginTop: 10,
-    padding: 10,
+    padding: "6px 14px",
+    borderRadius: 20,
     border: "none",
-    borderRadius: 8,
-    background: "#4ecdc4",
-    cursor: "pointer",
-    fontWeight: "bold"
+    background: "#3b82f6",
+    color: "#fff",
+    cursor: "pointer"
   },
 
   stats: {
     display: "flex",
     justifyContent: "space-around",
-    marginTop: 15
+    marginTop: 10,
+    fontSize: 14
   },
 
-  posts: {
-    marginTop: 20
-  },
-
-  postCard: {
-    background: "#2c2c54",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    color: "#fff",
-    boxShadow: "0 5px 15px rgba(0,0,0,0.2)"
-  },
-
-  postImage: {
+  image: {
     width: "100%",
     borderRadius: 10,
     marginTop: 10
@@ -206,6 +220,6 @@ const styles = {
 
   likes: {
     marginTop: 5,
-    color: "#ff6b6b"
+    color: "#e91e63"
   }
 };

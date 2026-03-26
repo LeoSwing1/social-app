@@ -8,32 +8,59 @@ export default function Signup() {
     password: ""
   });
 
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
+  const API = process.env.REACT_APP_API_URL;
 
   const handleSignup = async (e) => {
     e.preventDefault();
 
+    // 🔥 BASIC VALIDATION
+    if (!form.name || !form.email || !form.password) {
+      alert("All fields are required ❌");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
+      const res = await fetch(`${API}/api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim().toLowerCase(),
+          password: form.password
+        })
       });
 
       const data = await res.json();
 
       if (!res.ok) {
         alert(data.message || "Signup failed ❌");
+        setLoading(false);
         return;
       }
 
       alert("Signup success ✅");
+
+      // 🔥 RESET FORM
+      setForm({
+        name: "",
+        email: "",
+        password: ""
+      });
+
       navigate("/login");
+
     } catch (err) {
-      console.log(err);
+      console.log("SIGNUP ERROR:", err);
       alert("Server error ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,70 +72,97 @@ export default function Signup() {
         <form onSubmit={handleSignup}>
           <input
             placeholder="Name"
+            value={form.name}
             onChange={(e) =>
               setForm({ ...form, name: e.target.value })
             }
             style={styles.input}
+            required
           />
 
           <input
+            type="email"
             placeholder="Email"
+            value={form.email}
             onChange={(e) =>
               setForm({ ...form, email: e.target.value })
             }
             style={styles.input}
+            required
           />
 
           <input
             type="password"
             placeholder="Password"
+            value={form.password}
             onChange={(e) =>
               setForm({ ...form, password: e.target.value })
             }
             style={styles.input}
+            required
           />
 
-          <button style={styles.button}>Signup</button>
+          <button type="submit" style={styles.button}>
+            {loading ? "Signing up..." : "Signup"}
+          </button>
         </form>
 
         <p style={{ marginTop: 10 }}>
-          Already have account? <Link to="/login">Login</Link>
+          Already have account?{" "}
+          <Link to="/login" style={styles.link}>
+            Login
+          </Link>
         </p>
       </div>
     </div>
   );
 }
-
 const styles = {
   container: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#1e1e2f"
+    background: "linear-gradient(135deg, #1e1e2f, #2c2c54)",
+    padding: 10
   },
+
   card: {
     padding: 30,
-    background: "#2c2c54",
-    borderRadius: 10,
+    background: "rgba(255,255,255,0.1)",
+    backdropFilter: "blur(10px)",
+    borderRadius: 15,
     color: "#fff",
-    width: 300,
-    textAlign: "center"
+    width: "100%",
+    maxWidth: 320,
+    textAlign: "center",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
   },
+
   input: {
     width: "100%",
-    padding: 10,
+    padding: 12,
     margin: "10px 0",
-    borderRadius: 5,
-    border: "none"
+    borderRadius: 8,
+    border: "none",
+    outline: "none"
   },
+
   button: {
     width: "100%",
-    padding: 10,
+    padding: 12,
     background: "#4ecdc4",
     border: "none",
-    borderRadius: 5,
+    borderRadius: 8,
     color: "#fff",
-    cursor: "pointer"
+    cursor: "pointer",
+    marginTop: 10,
+    fontWeight: "bold"
+  },
+
+  link: {
+    color: "#4ecdc4",
+    textDecoration: "none",
+    fontWeight: "bold"
   }
 };

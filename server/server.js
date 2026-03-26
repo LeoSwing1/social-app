@@ -12,16 +12,11 @@ dotenv.config();
 const app = express();
 
 // ✅ CORS
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://social-app-beta-three.vercel.app"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
-  })
-);
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 // ✅ BODY PARSER
 app.use(express.json({ limit: "10mb" }));
