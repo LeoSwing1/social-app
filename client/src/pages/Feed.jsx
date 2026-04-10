@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react"; 
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import CreatePost from "../components/CreatePost";
@@ -16,9 +16,10 @@ export default function Feed() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
   const API = process.env.REACT_APP_API_URL;
 
-  // 🔥 FETCH POSTS (FIXED WITH useCallback)
   const fetchPosts = useCallback(async () => {
     try {
       const res = await fetch(`${API}/api/posts`);
@@ -49,7 +50,8 @@ export default function Feed() {
         body: JSON.stringify({
           text,
           image,
-          user: { name: user.name }
+          user: { name: user.name },
+          isAnonymous 
         })
       });
 
@@ -59,6 +61,7 @@ export default function Feed() {
 
       setText("");
       setImage(null);
+      setIsAnonymous(false); // reset toggle after post
 
       window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -95,6 +98,8 @@ export default function Feed() {
           createPost={createPost}
           setImage={setImage}
           image={image}
+          isAnonymous={isAnonymous}           // ✅ added
+          setIsAnonymous={setIsAnonymous}     // ✅ added
         />
 
         <Filters />

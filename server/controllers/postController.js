@@ -3,12 +3,13 @@ import Post from "../models/Post.js";
 // ✅ CREATE POST
 export const createPost = async (req, res) => {
   try {
-    const { text, image, user } = req.body;
+    const { text, image, user, isAnonymous } = req.body; // ✅ added
 
     const newPost = new Post({
       text,
       image,
-      user
+      user,
+      isAnonymous // ✅ added
     });
 
     await newPost.save();
@@ -62,7 +63,7 @@ export const toggleLike = async (req, res) => {
   }
 };
 
-// 💬 COMMENT (FINAL FIXED)
+// 💬 COMMENT
 export const addComment = async (req, res) => {
   try {
     const { postId, text, user } = req.body;
@@ -77,9 +78,7 @@ export const addComment = async (req, res) => {
 
     await post.save();
 
-    // 🔥 THIS LINE IS CRITICAL
     res.json(post);
-
   } catch (err) {
     res.status(500).json({ message: "Comment error" });
   }

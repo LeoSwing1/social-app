@@ -19,6 +19,17 @@ export default function PostCard({ post }) {
 
   if (!post) return null;
 
+  // ✅ ANONYMOUS LOGIC (UI ONLY)
+  const isAnon = post.isAnonymous;
+
+  const displayName = isAnon
+    ? "Anonymous 👤"
+    : post.user?.name || "User";
+
+  const displayAvatar = isAnon
+    ? "👤"
+    : post.user?.name?.charAt(0) || "U";
+
   // 🕒 TIME FORMAT
   const formatTimeAgo = (date) => {
     const now = new Date();
@@ -126,12 +137,17 @@ export default function PostCard({ post }) {
       <div style={styles.header}>
         <div style={styles.user}>
           <div style={styles.avatar}>
-            {post.user?.name?.charAt(0) || "U"}
+            {displayAvatar}
           </div>
 
           <strong style={styles.name}>
-            {post.user?.name || "User"}
+            {displayName}
           </strong>
+
+          {/* ✅ ANONYMOUS BADGE */}
+          {isAnon && (
+            <span style={styles.badge}>Anonymous</span>
+          )}
         </div>
 
         <button onClick={handleFollow} style={styles.follow}>
@@ -204,6 +220,7 @@ export default function PostCard({ post }) {
     </div>
   );
 }
+
 const styles = {
   card: {
     background: "#fff",
@@ -242,6 +259,16 @@ const styles = {
     fontSize: 14,
     fontWeight: 600,
     color: "#0f172a"
+  },
+
+  // ✅ NEW STYLE
+  badge: {
+    background: "#e0e7ff",
+    color: "#3730a3",
+    padding: "2px 8px",
+    borderRadius: 8,
+    fontSize: 11,
+    marginLeft: 6
   },
 
   follow: {

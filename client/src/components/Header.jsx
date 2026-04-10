@@ -7,7 +7,7 @@ export default function Header({ toggleSidebar }) {
       {/* MENU BUTTON */}
       <span onClick={toggleSidebar} style={styles.menu}>☰</span>
 
-      <h3>TaskPlanet</h3>
+      <h3>GenX</h3>
 
       <div style={styles.right}>
         <div style={styles.coin}>⭐ 50</div>

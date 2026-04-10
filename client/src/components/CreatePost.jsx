@@ -5,23 +5,26 @@ export default function CreatePost({
   setText,
   createPost,
   setImage,
-  image
+  image,
+  isAnonymous,        // ✅ added
+  setIsAnonymous      // ✅ added
 }) {
   const fileRef = useRef();
 
   // 🔥 HANDLE IMAGE SELECT
   const handleImage = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const reader = new FileReader();
+    const reader = new FileReader();
 
-  reader.onloadend = () => {
-    setImage(reader.result); // ✅ BASE64 STRING
+    reader.onloadend = () => {
+      setImage(reader.result); // ✅ BASE64 STRING
+    };
+
+    reader.readAsDataURL(file);
   };
 
-  reader.readAsDataURL(file);
-};
   return (
     <div style={styles.card}>
       <h4 style={styles.title}>Create Post</h4>
@@ -33,6 +36,16 @@ export default function CreatePost({
         onChange={(e) => setText(e.target.value)}
         style={styles.input}
       />
+
+      {/* 🔥 ANONYMOUS TOGGLE (NEW) */}
+      <label style={styles.toggle}>
+        <input
+          type="checkbox"
+          checked={isAnonymous}
+          onChange={(e) => setIsAnonymous(e.target.checked)}
+        />
+        Post anonymously 👤
+      </label>
 
       {/* FILE INPUT */}
       <input
@@ -102,6 +115,16 @@ const styles = {
     borderRadius: 10,
     border: "1px solid #e2e8f0",
     marginBottom: 10
+  },
+
+  // ✅ NEW STYLE
+  toggle: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 13,
+    marginBottom: 10,
+    cursor: "pointer"
   },
 
   previewWrapper: {

@@ -6,8 +6,15 @@ const postSchema = new mongoose.Schema(
       id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       name: String
     },
+
     text: String,
     image: String,
+
+    // ✅ NEW FIELD (CRITICAL)
+    isAnonymous: {
+      type: Boolean,
+      default: false
+    },
 
     likes: {
       type: Number,
@@ -22,20 +29,20 @@ const postSchema = new mongoose.Schema(
     ],
 
     comments: {
-  type: [
-    {
-      user: {
-        name: String
-      },
-      text: String,
-      createdAt: {
-        type: Date,
-        default: Date.now
-      }
+      type: [
+        {
+          user: {
+            name: String
+          },
+          text: String,
+          createdAt: {
+            type: Date,
+            default: Date.now
+          }
+        }
+      ],
+      default: []
     }
-  ],
-  default: [] // 🔥 THIS FIXES EVERYTHING
-},
   },
   { timestamps: true }
 );
